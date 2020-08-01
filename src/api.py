@@ -1,45 +1,49 @@
 from flask import Flask, abort, jsonify
+from google.cloud import datastore
+
+# Create a datastore client object to connect to Datastore.
+# An Environment Variable called GOOGLE_APPLICATION_CREDENTIALS with the path
+# to the Credential file must be created (Inside Dockerfile).
+datastore_client = datastore.Client()
 
 app = Flask(__name__)
 
-people = [
-    {'nationalId': '12345678-9',
-     'name': 'Hari',
-     'lastName': 'Seldon',
-     'age': 45,
-     'originPlanet': 'helicon',
-     'pictureUrl': 'https://your.picture.com/hari-seldon'},
-    {'nationalId': '435434-9',
-     'name': 'Samuel',
-     'lastName': 'Gomez',
-     'age': 36,
-     'originPlanet': 'Saturno',
-     'pictureUrl': 'https://your.picture.com/samuel-gomez'},
-    {'nationalId': '345345-5',
-     'name': 'Andres',
-     'lastName': 'Jelvez',
-     'age': 37,
-     'originPlanet': 'Marte',
-     'pictureUrl': 'https://your.picture.com/andres-jelvez'}
-]
 #########################################################
-# Returns all the elements in the table (Kind) "people" #
+# Returns all the elements in the Kind (Table) "people" #
 #########################################################
 @app.route("/people", methods=['GET'])
 def api_return_all_people():
-    return jsonify(people)
+    #query object with the Kind (Table) 'people' from Datastore
+    query = datastore_client.query(kind='people')
+    #fetch the results into a list of Entities (rows) objects
+    entity_list = list(query.fetch())
+    #empty list where results will be stores
+    results = []
+    #convert every Entity into a Dictionary (json) and append to results list
+    for entity in entity_list:
+        results.append(dict(entity))
+
+    return jsonify(results)
 ############################################
 # Returns a person based on his nationalId #
 ############################################
 @app.route("/people:<string:nationalId>", methods=['GET'])
 def api_search_a_person(nationalId):
-    result = None
-    for person in people:
-        if person['nationalId'] == nationalId:
-            result = person
-    if result is None:
+    #query object with the Kind (Table) 'people' from Datastore
+    query = datastore_client.query(kind='people')
+    #add a filter so it returns only enities that match nationalId = input
+    query.add_filter('nationalId', '=', nationalId)
+    #fetch the results into a list of Entities (rows) objects
+    entity_list = list(query.fetch())
+    #empty list where results will be stores
+    results = []
+    #convert every Entity into a Dictionary (json) and append to results list
+    for entity in entity_list:
+        results.append(dict(entity))
+    if results:
+        return jsonify(results[0])
+    else:
         abort(404, description="Person not found")
-    return jsonify(result)
 
 #To handle a 404 status when a person is not found
 @app.errorhandler(404)

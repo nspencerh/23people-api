@@ -7,6 +7,8 @@ COPY ./src src
 
 WORKDIR /src
 
+ENV GOOGLE_APPLICATION_CREDENTIALS datastore-key.json
+
 EXPOSE 5000
 
 CMD ["python","./api.py"]
