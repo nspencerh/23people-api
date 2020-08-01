@@ -1,6 +1,7 @@
-FROM python:alpine3.7
+FROM python
 
-RUN pip3 install flask
+RUN pip3 install flask --upgrade pip    && \
+    pip3 install google-cloud-datastore
 
 COPY ./src src
 
