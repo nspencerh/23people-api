@@ -26,7 +26,7 @@ def api_return_all_people():
         results.append(dict(entity))
 
     return jsonify(results)
-    
+
 ################################################################################
 #******************* Returns a person based on his nationalId *****************#
 ################################################################################
@@ -54,7 +54,7 @@ def api_search_a_person(nationalId):
 ################################################################################
 @app.route("/people", methods=['POST'])
 def api_insert_a_person():
-
+    #check if content_type is 'application/json'
     if request.content_type != 'application/json':
         error_message = { "success": False, "response": "Bad content_type" }
         return jsonify(success_message), 400
@@ -62,11 +62,47 @@ def api_insert_a_person():
         #request data from POST payload
         request_data = request.get_json()
         #insert data into people Kind (table)
-        task = datastore.Entity(datastore_client.key('people'))
-        task.update(request_data)
-        datastore_client.put(task)
+        insert = datastore.Entity(datastore_client.key('people'))
+        insert.update(request_data)
+        datastore_client.put(insert)
         success_message = { "success": True, "payload": request_data}
         return jsonify(success_message), 201
+
+################################################################################
+#******************* Updates a person based on nationalId *********************#
+################################################################################
+@app.route("/people:<string:nationalId>", methods=['PUT'])
+def api_update_a_person(nationalId):
+    #check if content_type is 'application/json'
+    if request.content_type != 'application/json':
+        error_message = { "success": False, "response": "Bad content_type" }
+        return jsonify(success_message), 400
+    else:
+        #query object with the Kind (Table) 'people' from Datastore
+        query = datastore_client.query(kind='people')
+        #add a filter so it returns only enities that match nationalId = input
+        query.add_filter('nationalId', '=', nationalId)
+        #fetch the results into a list of Entities (rows) objects
+        entity_list = list(query.fetch())
+        #if the list is not empty, delete every Entity (row) that matches nationalId
+        #and add the new payload to Datastore
+        if entity_list:
+            #request data from PUT payload
+            request_data = request.get_json()
+            #deletes every entity that matches nationalId
+            for entity in entity_list:
+                datastore_client.delete(datastore_client.key('people', entity.key.id))
+            #insert the new payload after the previous is deleted
+            insert = datastore.Entity(datastore_client.key('people'))
+            insert.update(request_data)
+            datastore_client.put(insert)
+
+            success_message = { "success": True, "response": "Successfully updated"}
+            return jsonify(success_message), 200
+    #if the list is empty, it means the person was not found
+        else:
+            not_found_message = { "success": True, "response": "Person not found" }
+            return jsonify(not_found_message), 404
 
 ################################################################################
 #******************* Deletes a person based on nationalId *********************#
@@ -81,17 +117,14 @@ def api_delete_a_person(nationalId):
     entity_list = list(query.fetch())
     #if the list is not empty, delete every Entity (row) that matches nationalId
     if entity_list:
-            for entity in entity_list:
-                datastore_client.delete(datastore_client.key('people', entity.key.id))
-            success_message = { "success": True, "payload": "Deleted successfully"}
-            return jsonify(success_message), 200
+        for entity in entity_list:
+            datastore_client.delete(datastore_client.key('people', entity.key.id))
+        success_message = { "success": True, "response": "Deleted successfully"}
+        return jsonify(success_message), 200
     #if the list is empty, it means the person was not found
     else:
         not_found_message = { "success": True, "response": "Person not found" }
         return jsonify(not_found_message), 404
-
-
-
 
 
 if __name__ == "__main__":
