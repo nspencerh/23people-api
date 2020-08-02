@@ -26,6 +26,7 @@ def api_return_all_people():
         results.append(dict(entity))
 
     return jsonify(results)
+    
 ################################################################################
 #******************* Returns a person based on his nationalId *****************#
 ################################################################################
@@ -66,6 +67,29 @@ def api_insert_a_person():
         datastore_client.put(task)
         success_message = { "success": True, "payload": request_data}
         return jsonify(success_message), 201
+
+################################################################################
+#******************* Deletes a person based on nationalId *********************#
+################################################################################
+@app.route("/people:<string:nationalId>", methods=['DELETE'])
+def api_delete_a_person(nationalId):
+    #query object with the Kind (Table) 'people' from Datastore
+    query = datastore_client.query(kind='people')
+    #add a filter so it returns only enities that match nationalId = input
+    result = query.add_filter('nationalId', '=', nationalId)
+    #fetch the results into a list of Entities (rows) objects
+    entity_list = list(query.fetch())
+    #if the list is not empty, delete every Entity (row) that matches nationalId
+    if entity_list:
+            for entity in entity_list:
+                datastore_client.delete(datastore_client.key('people', entity.key.id))
+            success_message = { "success": True, "payload": "Deleted successfully"}
+            return jsonify(success_message), 200
+    #if the list is empty, it means the person was not found
+    else:
+        not_found_message = { "success": True, "response": "Person not found" }
+        return jsonify(not_found_message), 404
+
 
 
 
