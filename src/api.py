@@ -1,4 +1,4 @@
-from flask import Flask, abort, jsonify
+from flask import Flask, jsonify, request
 from google.cloud import datastore
 
 # Create a datastore client object to connect to Datastore.
@@ -8,9 +8,11 @@ datastore_client = datastore.Client()
 
 app = Flask(__name__)
 
-#########################################################
-# Returns all the elements in the Kind (Table) "people" #
-#########################################################
+app.config['JSON_SORT_KEYS'] = False
+
+################################################################################
+#************* Returns all the elements in the Kind (Table) "people" **********#
+################################################################################
 @app.route("/people", methods=['GET'])
 def api_return_all_people():
     #query object with the Kind (Table) 'people' from Datastore
@@ -24,9 +26,9 @@ def api_return_all_people():
         results.append(dict(entity))
 
     return jsonify(results)
-############################################
-# Returns a person based on his nationalId #
-############################################
+################################################################################
+#******************* Returns a person based on his nationalId *****************#
+################################################################################
 @app.route("/people:<string:nationalId>", methods=['GET'])
 def api_search_a_person(nationalId):
     #query object with the Kind (Table) 'people' from Datastore
@@ -43,12 +45,29 @@ def api_search_a_person(nationalId):
     if results:
         return jsonify(results[0])
     else:
-        abort(404, description="Person not found")
+        not_found_message = { "success": True, "response": "Person not found" }
+        return jsonify(not_found_message), 404
 
-#To handle a 404 status when a person is not found
-@app.errorhandler(404)
-def person_not_found(e):
-    return jsonify(response=str(e)), 404
+################################################################################
+#************* Inserts a Person in the Database based on a payload ************#
+################################################################################
+@app.route("/people", methods=['POST'])
+def api_insert_a_person():
+
+    if request.content_type != 'application/json':
+        error_message = { "success": False, "response": "Bad content_type" }
+        return jsonify(success_message), 400
+    else:
+        #request data from POST payload
+        request_data = request.get_json()
+        #insert data into people Kind (table)
+        task = datastore.Entity(datastore_client.key('people'))
+        task.update(request_data)
+        datastore_client.put(task)
+        success_message = { "success": True, "payload": request_data}
+        return jsonify(success_message), 201
+
+
 
 
 if __name__ == "__main__":
