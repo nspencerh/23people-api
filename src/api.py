@@ -8,8 +8,6 @@ datastore_client = datastore.Client()
 
 app = Flask(__name__)
 
-app.config['JSON_SORT_KEYS'] = False
-
 ################################################################################
 #************* Returns all the elements in the Kind (Table) "people" **********#
 ################################################################################
@@ -65,7 +63,7 @@ def api_insert_a_person():
         insert = datastore.Entity(datastore_client.key('people'))
         insert.update(request_data)
         datastore_client.put(insert)
-        success_message = { "success": True, "payload": request_data}
+        success_message = { "success": True, "response": "Person added"}
         return jsonify(success_message), 201
 
 ################################################################################
