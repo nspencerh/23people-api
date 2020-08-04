@@ -18,7 +18,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-		sh 'deploying image...'
+		sh 'echo deploying image...'
             }
         }
     }
