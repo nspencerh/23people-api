@@ -28,7 +28,7 @@ def api_return_all_people():
 ################################################################################
 #******************* Returns a person based on his nationalId *****************#
 ################################################################################
-@app.route("/people:<string:nationalId>", methods=['GET'])
+@app.route("/people/<string:nationalId>", methods=['GET'])
 def api_search_a_person(nationalId):
     #query object with the Kind (Table) 'people' from Datastore
     query = datastore_client.query(kind='people')
@@ -69,7 +69,7 @@ def api_insert_a_person():
 ################################################################################
 #******************* Updates a person based on nationalId *********************#
 ################################################################################
-@app.route("/people:<string:nationalId>", methods=['PUT'])
+@app.route("/people/<string:nationalId>", methods=['PUT'])
 def api_update_a_person(nationalId):
     #check if content_type is 'application/json'
     if request.content_type != 'application/json':
@@ -105,7 +105,7 @@ def api_update_a_person(nationalId):
 ################################################################################
 #******************* Deletes a person based on nationalId *********************#
 ################################################################################
-@app.route("/people:<string:nationalId>", methods=['DELETE'])
+@app.route("/people/<string:nationalId>", methods=['DELETE'])
 def api_delete_a_person(nationalId):
     #query object with the Kind (Table) 'people' from Datastore
     query = datastore_client.query(kind='people')
