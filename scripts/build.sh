@@ -4,4 +4,4 @@ echo "****************************"
 echo "** Building Docker Image ***"
 echo "****************************"
 
-docker-compose docker-compose.yml build --no-cache
+docker-compose build --no-cache
