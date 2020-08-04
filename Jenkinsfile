@@ -12,9 +12,7 @@ pipeline {
 
         stage('Push') {
             steps {
-              withEnv(['GCLOUD_PATH=/home/google-cloud-sdk/bin']){
 		          sh './scripts/push.sh'
-              }
             }
         }
 
