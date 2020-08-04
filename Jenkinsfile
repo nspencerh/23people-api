@@ -12,7 +12,7 @@ pipeline {
 
         stage('Push') {
             steps {
-		sh 'echo pushing image...'
+		sh './scripts/push.sh'
             }
         }
 
