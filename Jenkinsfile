@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     environment {
-      HOST = credentials('api-host') 
+      HOST = credentials('api-host')
     }
 
     stages {
@@ -25,7 +25,8 @@ pipeline {
           sshagent(credentials : ['23People']) {
             sh 'ssh -o StrictHostKeyChecking=no nicolaspencer@${HOST} uptime'
             sh 'ssh -v nicolaspencer@${HOST}'
-            sh './scripts/deploy.sh'
+            sh 'scp ./scripts/deploy.sh nicolaspencer@${HOST}:/home/nicolaspencer/deploy.sh'
+            sh 'ssh nicolaspencer@${HOST} 'bash -s' < /home/nicolaspencer/deploy.sh'
           }
         }
       }
