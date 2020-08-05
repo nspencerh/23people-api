@@ -15,7 +15,7 @@ app = Flask(__name__)
 def api_return_all_people():
     try:
         if request.content_type != 'application/json':
-            content_type_error_message = {"error": {"code": 400, "message": "Testing the pipeline...."}}
+            content_type_error_message = {"error": {"code": 400, "message": "Bad content_type"}}
             return jsonify(content_type_error_message), 400
         else:
             #query object with the Kind (Table) 'people' from Datastore
