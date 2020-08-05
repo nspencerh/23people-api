@@ -23,7 +23,7 @@ pipeline {
         stage('Deploy') {
             steps {
               sshagent(credentials : ['23People']) {
-                sh 'ssh -o StrictHostKeyChecking=no nicolaspencer@35.184.120.48 uptime'
+                sh 'ssh -o StrictHostKeyChecking=no nicolaspencer@$api-host uptime'
                 sh 'ssh -v nicolaspencer@$api-host'
                 sh './scripts/deploy.sh'
               }
