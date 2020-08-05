@@ -26,7 +26,7 @@ pipeline {
             sh 'ssh -o StrictHostKeyChecking=no nicolaspencer@${HOST} uptime'
             sh 'ssh -v nicolaspencer@${HOST}'
             sh 'scp ./scripts/deploy.sh nicolaspencer@${HOST}:/home/nicolaspencer/deploy.sh'
-            sh 'ssh nicolaspencer@${HOST} 'bash -s' < /home/nicolaspencer/deploy.sh'
+            sh "ssh nicolaspencer@${HOST} 'bash -s' < /home/nicolaspencer/deploy.sh"
           }
         }
       }
